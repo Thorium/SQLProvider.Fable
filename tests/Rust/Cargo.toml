@@ -1,0 +1,14 @@
+[package]
+name = "sqlprovider_fable_smoke"
+version = "0.1.0"
+edition = "2021"
+
+# Fable writes the entry point as Program.rs at the output root, not src/main.rs.
+[[bin]]
+name = "sqlprovider_fable_smoke"
+path = "Program.rs"
+
+[dependencies]
+fable_library_rust = { path = "./fable_modules/fable-library-rust" }
+# bundled: compiles SQLite from source, so no system library is needed
+rusqlite = { version = "0.32", features = ["bundled"] }

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Rusqlite.fs" />
+    <!-- Copied next to the generated .rs and pulled in by an importAll in the
+         consuming Fable project. Not compiled by MSBuild. -->
+    <None Include="sqlite_native.rs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SQLProvider.Fable.Core\SQLProvider.Fable.Core.fsproj" />
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="*.fs" PackagePath="fable\" Pack="true" />
+    <Content Include="*.rs" PackagePath="fable\" Pack="true" />
+    <Content Include="*.fsproj" PackagePath="fable\" Pack="true" />
+  </ItemGroup>
+
+</Project>

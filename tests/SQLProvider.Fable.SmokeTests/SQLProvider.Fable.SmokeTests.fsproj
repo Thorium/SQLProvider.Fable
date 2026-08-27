@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- Shared by the .NET xunit runner and the Fable/Rust runner, so this
+         project must stay as portable as SQLProvider.Fable.Core itself. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Smoke.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SQLProvider.Fable.Core\SQLProvider.Fable.Core.fsproj" />
+  </ItemGroup>
+
+</Project>

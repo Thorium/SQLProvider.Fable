@@ -1,0 +1,13 @@
+# .NET
+bin/
+obj/
+*.user
+
+# Rust / Cargo
+target/
+Cargo.lock
+
+# Fable
+.fable/
+fable_modules/
+build/

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- Portable F# only: no System.Data, no System.Linq.Expressions, no
+         reflection. Everything here must survive Fable's Rust backend. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="SqlValue.fs" />
+    <Compile Include="Connector.fs" />
+    <Compile Include="Row.fs" />
+  </ItemGroup>
+
+  <!-- Fable consumes source, not the assembly. Shipping the .fs files in the
+       package under fable/ is what makes this usable from a Fable project. -->
+  <ItemGroup>
+    <Content Include="*.fs" PackagePath="fable\" Pack="true" />
+    <Content Include="*.fsproj" PackagePath="fable\" Pack="true" />
+  </ItemGroup>
+
+</Project>
