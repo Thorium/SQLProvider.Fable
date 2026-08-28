@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Fable/JavaScript connector for SQLProvider.Fable, over node:sqlite -- built into Node 22.5+, so no npm dependency.</Description>
   </PropertyGroup>
 
   <ItemGroup>

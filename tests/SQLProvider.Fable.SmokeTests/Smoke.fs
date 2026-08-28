@@ -855,6 +855,13 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
 
         results.Add(check "count of a distinct column" "2" (string distinctCountries))
 
+        // exists must not inherit countQuery's DISTINCT strictness: whether
+        // anything matches is the same question with or without deduplication.
+        let! distinctAny =
+            Db.exists c (Query.from Cols.table |> Query.where (Cols.CustomerId <=. 3) |> Query.distinct)
+
+        results.Add(isTrue "exists on a DISTINCT query" distinctAny)
+
         // 17. set operations. Germany's names union names with a balance over
         // 100 -- Alfreds is in both, so UNION folds it and UNION ALL does not.
         let germanNames =

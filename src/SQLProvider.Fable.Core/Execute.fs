@@ -90,7 +90,9 @@ module Db =
     /// Whether the query matches anything, without dragging the rows back.
     let exists (conn: ISqlConnector) (q: Query) : Async<bool> =
         async {
-            let! n = count conn q
+            // Deduplication cannot change whether anything exists, so DISTINCT
+            // is dropped here rather than refused the way a bare count of it is.
+            let! n = count conn { q with Distinct = false }
             return n > 0L
         }
 

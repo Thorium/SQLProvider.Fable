@@ -3,7 +3,7 @@
 Typed SQL for F#, from one source, on .NET **and** through Fable to **Rust**,
 **JavaScript NodeJs** and **Erlang/BEAM**.
 
-NOTE: Rust is "comming soon" as it needs some Fable side PRs merged first.
+NOTE: Rust is "coming soon" as it needs some Fable side PRs merged first.
 
 Point the generator at your database, get a module per table with typed columns
 and row mappers, and write queries against them:
@@ -86,36 +86,61 @@ BEAM runs the whole portable half (query building, SQL generation, value
 encoding, row readers, the async layer) but has no connector yet. `epgsql` and
 `mysql-otp` are pure Erlang and so the easiest ones to add.
 
-Not on NuGet yet: reference the projects directly.
+Packages: `SQLProvider.Fable.Core`, `.Ado`, `.Rust`, `.Js`, and the generator
+as the dotnet tool `SQLProvider.Fable.Generator`. CI packs them on every build
+and publishes to nuget.org on a `v*` tag.
 
 ---
 
 ## Getting started
 
-Reference the runtime, plus the backend for your target:
+Reference `SQLProvider.Fable.Core` plus the connector for your target — only
+one connector ends up in a given build:
 
 ```xml
-<ProjectReference Include="path/to/src/SQLProvider.Fable.Core/SQLProvider.Fable.Core.fsproj" />
-<ProjectReference Include="path/to/src/SQLProvider.Fable.Ado/SQLProvider.Fable.Ado.fsproj" />
+<PackageReference Include="SQLProvider.Fable.Core" Version="0.1.0" />
+<PackageReference Include="SQLProvider.Fable.Ado" Version="0.1.0" />   <!-- .NET -->
+<!-- or SQLProvider.Fable.Rust / SQLProvider.Fable.Js for a Fable target -->
 ```
 
-`Core` is where everything portable lives. Add `SQLProvider.Fable.Ado` for .NET,
-`SQLProvider.Fable.Rust` for Fable/Rust, or `SQLProvider.Fable.Js` for
-Fable/JavaScript — only one of them ends up in a given build.
+(Working from a clone instead, `ProjectReference` the same projects under
+`src/`.)
+
+The packages carry their F# sources under `fable/`, the way Fable libraries do,
+so a Fable project compiles the library to its own target while .NET uses the
+compiled assembly from the same package.
 
 JavaScript and BEAM need nothing beyond released Fable. Rust additionally needs
-the unmerged fix described under [Status](#status).
+the unmerged fix described under [Status](#status), and the consuming crate's
+`Cargo.toml` needs the driver stack the connector calls into:
+
+```toml
+[dependencies]
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio", "any", "sqlite", "postgres", "mysql",
+] }
+tokio = { version = "1", features = ["rt-multi-thread"] }
+futures = "0.3"
+```
 
 ---
 
 ## Generating from your schema
 
 Hand-writing `Col.text "Customer" "Name"` per column is the work a provider is
-supposed to remove, so generate it:
+supposed to remove, so generate it. The generator is a dotnet tool:
 
 ```bash
-dotnet run --project tools/SQLProvider.Fable.Generator -- --sqlite ./app.db --module Northwind --out ./src/Schema.fs
+dotnet tool install --global SQLProvider.Fable.Generator
 ```
+
+```bash
+sqlprovider-fable-gen --sqlite ./app.db --module Northwind --out ./src/Schema.fs
+```
+
+`--postgres "Host=...;Username=...;Password=...;Database=..."` reads a live
+PostgreSQL schema the same way. (From a clone,
+`dotnet run --project tools/SQLProvider.Fable.Generator -- ...` does the same.)
 
 Add `Schema.fs` to your project and check it in. Regenerate when the schema
 changes rather than editing it — the names in it have to keep matching the
@@ -317,6 +342,12 @@ germanCustomers
 ```
 
 MySQL accepts `INTERSECT` and `EXCEPT` from 8.0.31.
+
+Only ordering and paging apply to the combined result. Every other clause —
+`where`, `groupBy`, `select` — still describes the **first** SELECT, whether
+written before or after the `union`: SQL cannot filter a combined result
+without nesting it in a FROM, which this library does not do. Filter the arms,
+not the union.
 
 ```fsharp
 |> Query.where (Expr.contains Customer.Name.E searchBox)

@@ -3,15 +3,30 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>false</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>sqlprovider-fable-gen</ToolCommandName>
+    <Version>0.1.0</Version>
+    <Authors>Tuomas Hietanen</Authors>
+    <Description>Schema code generator for SQLProvider.Fable: reads a live SQLite or PostgreSQL schema and writes typed table modules -- columns, row records, mappers and foreign-key join conditions -- as ordinary F# source to check in.</Description>
+    <PackageLicenseExpression>Unlicense</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Thorium/SQLProvider.Fable</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Thorium/SQLProvider.Fable</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>fsharp;fable;sql;sqlite;postgresql;codegen;sqlprovider</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Program.fs" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
+    <!-- Referenced directly rather than discovered through DbProviderFactories:
+         a packed dotnet tool is a closed world, so a factory the caller was
+         supposed to register can never appear in it. -->
+    <PackageReference Include="Npgsql" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>

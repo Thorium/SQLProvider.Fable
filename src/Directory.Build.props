@@ -1,0 +1,27 @@
+<Project>
+
+  <!-- Shared NuGet metadata for every package under src/. Each project adds
+       its own Description; everything identity-shaped lives here once. -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>Tuomas Hietanen</Authors>
+    <PackageLicenseExpression>Unlicense</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Thorium/SQLProvider.Fable</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Thorium/SQLProvider.Fable</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>fsharp;fable;sql;sqlite;postgresql;mysql;rust;sqlprovider;database</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- Without this the packages inherit the compiling SDK's FSharp.Core as
+       their floor, which would force every consumer to its very newest.
+       8.0 is comfortably old enough for everything this code uses. -->
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="8.0.301" />
+  </ItemGroup>
+
+</Project>

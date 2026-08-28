@@ -5,6 +5,7 @@
     <!-- Portable F# only: no System.Data, no System.Linq.Expressions, no
          reflection. Everything here must survive Fable's Rust backend. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>Typed SQL for F#, from one source, on .NET and through Fable on Rust, JavaScript and BEAM. The portable core: schema-typed columns, composable queries, vendor-aware SQL generation, row readers. Pair with one connector package per target.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <!-- Design-time only: this reads a schema and writes F# source, and never
-         reaches a Fable target. It is free to use whatever .NET it likes. -->
+         reaches a Fable target. It is free to use whatever .NET it likes.
+         Not packaged: it ships inside the generator tool instead. -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

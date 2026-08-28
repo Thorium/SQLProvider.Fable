@@ -582,6 +582,11 @@ module Query =
     /// project the same number of columns; the result's column names come from
     /// this query, and any `orderBy`/`skip`/`take` on this query order and page
     /// the combined result.
+    ///
+    /// Every *other* clause -- `where`, `groupBy`, `select` and the rest --
+    /// still describes the first SELECT, whether written before or after this
+    /// call: SQL has no way to filter a combined result without nesting it in
+    /// a FROM, which this library does not do. Filter the arms, not the union.
     let union (other: Query) (q: Query) = addCompound Union other q
 
     /// `UNION ALL` -- `.Concat()`: everything from both, duplicates kept.

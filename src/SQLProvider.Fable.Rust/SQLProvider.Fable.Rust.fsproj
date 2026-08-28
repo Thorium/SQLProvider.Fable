@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Fable/Rust connector for SQLProvider.Fable, over sqlx: SQLite, PostgreSQL and MySQL/MariaDB from one URL-picked code path. Needs a Fable fix (fix/rust-async) that has not shipped yet -- see the README -- and sqlx/tokio/futures in the consuming crate's Cargo.toml.</Description>
   </PropertyGroup>
 
   <ItemGroup>

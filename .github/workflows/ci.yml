@@ -1,0 +1,68 @@
+name: CI
+
+# The .NET suite runs everywhere and carries the shared smoke tests, the query
+# renderers for every vendor, and the code generator's golden file -- so it
+# guards all targets' logic even though only .NET executes here. The Fable
+# target legs (Rust needs an unmerged Fable fix, and cargo/node runs) stay
+# local for now; see README "Running the tests".
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Test
+        run: dotnet test tests/SQLProvider.Fable.Tests.Net/SQLProvider.Fable.Tests.Net.fsproj
+
+      - name: README samples compile
+        run: dotnet build tests/SQLProvider.Fable.Tests.Readme/SQLProvider.Fable.Tests.Readme.fsproj
+
+      - name: Pack
+        run: |
+          dotnet pack src/SQLProvider.Fable.Core/SQLProvider.Fable.Core.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Ado/SQLProvider.Fable.Ado.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Rust/SQLProvider.Fable.Rust.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Js/SQLProvider.Fable.Js.fsproj -c Release -o packages
+          dotnet pack tools/SQLProvider.Fable.Generator/SQLProvider.Fable.Generator.fsproj -c Release -o packages
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: packages/*.nupkg
+
+  # Publishes on a version tag (v0.1.0). Needs the NUGET_API_KEY repository
+  # secret; the push is what makes a release, so nothing publishes by accident.
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Pack
+        run: |
+          dotnet pack src/SQLProvider.Fable.Core/SQLProvider.Fable.Core.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Ado/SQLProvider.Fable.Ado.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Rust/SQLProvider.Fable.Rust.fsproj -c Release -o packages
+          dotnet pack src/SQLProvider.Fable.Js/SQLProvider.Fable.Js.fsproj -c Release -o packages
+          dotnet pack tools/SQLProvider.Fable.Generator/SQLProvider.Fable.Generator.fsproj -c Release -o packages
+
+      - name: Push to nuget.org
+        run: dotnet nuget push "packages/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

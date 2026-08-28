@@ -12,3 +12,6 @@ Cargo.lock
 .fable/
 fable_modules/
 build/
+
+# NuGet pack output
+packages/

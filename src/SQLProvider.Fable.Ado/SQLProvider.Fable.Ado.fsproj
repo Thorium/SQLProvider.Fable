@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Description>.NET connector for SQLProvider.Fable: wraps any ADO.NET DbConnection (Microsoft.Data.Sqlite, Npgsql, MySqlConnector, ...).</Description>
   </PropertyGroup>
 
   <ItemGroup>

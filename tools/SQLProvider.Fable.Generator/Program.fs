@@ -1,7 +1,9 @@
 /// Generates F# from a live database schema.
 ///
-///   dotnet run --project tools/SQLProvider.Fable.Generator -- \
-///       --sqlite ./app.db --module Northwind --out ./src/Schema.fs
+///   dotnet tool install --global SQLProvider.Fable.Generator
+///   sqlprovider-fable-gen --sqlite ./app.db --module Northwind --out ./src/Schema.fs
+///
+/// (or from this repo: dotnet run --project tools/SQLProvider.Fable.Generator -- ...)
 ///
 /// The output is ordinary source: check it in, read it, diff it. Regenerate it
 /// when the schema changes rather than editing it, because the column names in
@@ -9,7 +11,6 @@
 module SQLProvider.Fable.Generator.Program
 
 open System
-open System.Data.Common
 open SQLProvider.Fable
 open SQLProvider.Fable.Ado
 open SQLProvider.Fable.Design
@@ -33,15 +34,11 @@ let main argv =
             let c = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=" + file)
             Some(new AdoConnector(c, vendor = Sqlite) :> ISqlConnector)
         | _, Some cs ->
-            // Npgsql is not referenced here on purpose: the generator takes any
-            // DbProviderFactory-registered provider, so a caller can bring its
-            // own without this tool depending on every driver in existence.
-            match DbProviderFactories.GetFactory "Npgsql" with
-            | null -> None
-            | factory ->
-                let c = factory.CreateConnection()
-                c.ConnectionString <- cs
-                Some(new AdoConnector(c, vendor = Postgres) :> ISqlConnector)
+            // Npgsql is referenced directly: this ships as a packed dotnet
+            // tool, which is a closed world -- a DbProviderFactory the caller
+            // was supposed to register could never appear inside it.
+            let c = new Npgsql.NpgsqlConnection(cs)
+            Some(new AdoConnector(c, vendor = Postgres) :> ISqlConnector)
         | _ -> None
 
     match connector, outPath with
@@ -57,7 +54,6 @@ let main argv =
             conn.Close()
     | None, _ ->
         eprintfn "%s" usage
-        eprintfn "  (a --postgres connection needs Npgsql registered with DbProviderFactories)"
         1
     | _, None ->
         eprintfn "%s" usage
