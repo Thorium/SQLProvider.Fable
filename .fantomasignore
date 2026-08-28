@@ -1,0 +1,4 @@
+# Golden file: byte-identical to what CodeGen emits, and a test asserts so.
+# Formatting it breaks the comparison -- regenerate it instead
+# (SQLPROVIDER_FABLE_REGENERATE=1).
+tests/SQLProvider.Fable.SmokeTests/GeneratedSchema.fs

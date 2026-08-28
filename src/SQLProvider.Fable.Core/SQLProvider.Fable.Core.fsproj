@@ -10,7 +10,13 @@
   <ItemGroup>
     <Compile Include="SqlValue.fs" />
     <Compile Include="Connector.fs" />
+    <Compile Include="Dialect.fs" />
     <Compile Include="Row.fs" />
+    <Compile Include="Query.fs" />
+    <Compile Include="Crud.fs" />
+    <Compile Include="QueryExpression.fs" />
+    <Compile Include="SqlGen.fs" />
+    <Compile Include="Execute.fs" />
   </ItemGroup>
 
   <!-- Fable consumes source, not the assembly. Shipping the .fs files in the

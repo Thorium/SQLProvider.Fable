@@ -2,11 +2,20 @@
   <Folder Name="/src/">
     <Project Path="src/SQLProvider.Fable.Ado/SQLProvider.Fable.Ado.fsproj" />
     <Project Path="src/SQLProvider.Fable.Core/SQLProvider.Fable.Core.fsproj" />
+    <Project Path="src/SQLProvider.Fable.Design/SQLProvider.Fable.Design.fsproj" />
+    <Project Path="src/SQLProvider.Fable.Js/SQLProvider.Fable.Js.fsproj" />
     <Project Path="src/SQLProvider.Fable.Rust/SQLProvider.Fable.Rust.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SQLProvider.Fable.SmokeTests/SQLProvider.Fable.SmokeTests.fsproj" />
     <Project Path="tests/SQLProvider.Fable.Tests.Net/SQLProvider.Fable.Tests.Net.fsproj" />
+    <Project Path="tests/SQLProvider.Fable.Tests.Readme/SQLProvider.Fable.Tests.Readme.fsproj" />
+  </Folder>
+  <Folder Name="/tests/Beam/">
+    <Project Path="tests/Beam/SQLProvider.Fable.Tests.Beam.fsproj" />
+  </Folder>
+  <Folder Name="/tests/Js/">
+    <Project Path="tests/Js/SQLProvider.Fable.Tests.Js.fsproj" />
   </Folder>
   <Folder Name="/tests/Rust/">
     <Project Path="tests/Rust/SQLProvider.Fable.Tests.Rust.fsproj" />

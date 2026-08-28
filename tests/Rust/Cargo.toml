@@ -9,6 +9,20 @@ name = "sqlprovider_fable_smoke"
 path = "Program.rs"
 
 [dependencies]
-fable_library_rust = { path = "./fable_modules/fable-library-rust" }
-# bundled: compiles SQLite from source, so no system library is needed
-rusqlite = { version = "0.32", features = ["bundled"] }
+# "threaded" is not optional: Fable's Rust runtime only defines Async under it.
+fable_library_rust = { path = "./fable_modules/fable-library-rust", features = [
+    "threaded",
+] }
+
+# One driver set for all three engines; the URL scheme picks between them.
+# The sqlite feature compiles SQLite from source, so no system library is needed.
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",
+    "any",
+    "sqlite",
+    "postgres",
+    "mysql",
+] }
+
+tokio = { version = "1", features = ["rt-multi-thread"] }
+futures = "0.3"

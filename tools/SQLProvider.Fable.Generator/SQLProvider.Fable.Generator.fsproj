@@ -1,25 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
-    <Compile Include="CodeGenTests.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SQLProvider.Fable.Ado\SQLProvider.Fable.Ado.fsproj" />
-    <ProjectReference Include="..\SQLProvider.Fable.SmokeTests\SQLProvider.Fable.SmokeTests.fsproj" />
     <ProjectReference Include="..\..\src\SQLProvider.Fable.Design\SQLProvider.Fable.Design.fsproj" />
   </ItemGroup>
 

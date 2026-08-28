@@ -5,10 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Sqlx.fs" />
-    <!-- Copied next to the generated .rs and pulled in by an importAll in the
-         consuming Fable project. Not compiled by MSBuild. -->
-    <None Include="sqlx_native.rs" />
+    <Compile Include="JsConnector.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +15,6 @@
 
   <ItemGroup>
     <Content Include="*.fs" PackagePath="fable\" Pack="true" />
-    <Content Include="*.rs" PackagePath="fable\" Pack="true" />
     <Content Include="*.fsproj" PackagePath="fable\" Pack="true" />
   </ItemGroup>
 

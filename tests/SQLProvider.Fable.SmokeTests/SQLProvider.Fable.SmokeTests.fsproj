@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Harness.fs" />
+    <Compile Include="DialectTests.fs" />
+    <Compile Include="GeneratedSchema.fs" />
+    <Compile Include="QueryTests.fs" />
     <Compile Include="Smoke.fs" />
   </ItemGroup>
 

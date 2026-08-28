@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Design-time only: this reads a schema and writes F# source, and never
+         reaches a Fable target. It is free to use whatever .NET it likes. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Schema.fs" />
+    <Compile Include="SchemaReader.fs" />
+    <Compile Include="CodeGen.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SQLProvider.Fable.Core\SQLProvider.Fable.Core.fsproj" />
+  </ItemGroup>
+
+</Project>
