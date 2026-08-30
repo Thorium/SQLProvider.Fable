@@ -74,7 +74,7 @@ module Dialect =
 
                         match style with
                         | Numbered -> out.Append('$').Append(ordered.Count) |> ignore
-                        | _ -> out.Append('?') |> ignore
+                        | Named | Positional -> out.Append('?') |> ignore
 
                         i <- last
                     | None ->

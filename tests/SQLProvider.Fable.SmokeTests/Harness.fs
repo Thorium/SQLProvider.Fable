@@ -24,7 +24,7 @@ let check name expected actual =
     if expected = actual then
         pass name
     else
-        fail name ("expected " + expected + ", got " + actual)
+        fail name ($"expected {expected}, got {actual}")
 
 /// Asserts a condition without stringifying it. `string true` is "True" on
 /// .NET and Rust but "true" on JavaScript, so a boolean must never reach
@@ -45,7 +45,7 @@ let report (results: TestResult[]) =
             if r.Passed then
                 "  PASS  " + r.Name
             else
-                "  FAIL  " + r.Name + " -- " + r.Detail)
+                $"  FAIL  {r.Name} -- {r.Detail}")
 
     let summary =
         "  "

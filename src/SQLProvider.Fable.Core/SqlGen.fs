@@ -76,46 +76,46 @@ module SqlGen =
     /// reordering. Returns None where the engine has no equivalent.
     let private fnName (vendor: Vendor) (fn: SqlFn) =
         match fn, vendor with
-        | Upper, _ -> Some "UPPER"
-        | Lower, _ -> Some "LOWER"
-        | Trim, _ -> Some "TRIM"
-        | Replace, _ -> Some "REPLACE"
-        | Abs, _ -> Some "ABS"
+        | Upper, _ -> ValueSome "UPPER"
+        | Lower, _ -> ValueSome "LOWER"
+        | Trim, _ -> ValueSome "TRIM"
+        | Replace, _ -> ValueSome "REPLACE"
+        | Abs, _ -> ValueSome "ABS"
 
-        | Length, Sqlite -> Some "LENGTH"
-        | Length, Postgres -> Some "CHAR_LENGTH"
-        | Length, MySql -> Some "CHAR_LENGTH"
-        | Length, Generic -> Some "LENGTH"
+        | Length, Sqlite -> ValueSome "LENGTH"
+        | Length, Postgres -> ValueSome "CHAR_LENGTH"
+        | Length, MySql -> ValueSome "CHAR_LENGTH"
+        | Length, Generic -> ValueSome "LENGTH"
 
-        | Substring, MySql -> Some "MID"
-        | Substring, Sqlite -> Some "SUBSTR"
-        | Substring, _ -> Some "SUBSTRING"
+        | Substring, MySql -> ValueSome "MID"
+        | Substring, Sqlite -> ValueSome "SUBSTR"
+        | Substring, _ -> ValueSome "SUBSTRING"
 
-        | IndexOf, Postgres -> Some "STRPOS"
-        | IndexOf, MySql -> Some "LOCATE"
-        | IndexOf, Sqlite -> Some "INSTR"
-        | IndexOf, Generic -> Some "INSTR"
+        | IndexOf, Postgres -> ValueSome "STRPOS"
+        | IndexOf, MySql -> ValueSome "LOCATE"
+        | IndexOf, Sqlite -> ValueSome "INSTR"
+        | IndexOf, Generic -> ValueSome "INSTR"
 
         // Every engine's plain-rounding function has the same name.
-        | Round, _ -> Some "ROUND"
+        | Round, _ -> ValueSome "ROUND"
 
         // The rest are not plain function calls on every engine, so they are
         // handled separately below and never reach this table.
-        | (Year | Month | Day | Hour | Minute | Second | DateOnly), _ -> None
-        | (Ceiling | Floor | RoundTo _ | Truncate | Greatest | Least), _ -> None
-        | (CastText | CastInt | DateDiffDays | DateDiffSecs), _ -> None
+        | (Year | Month | Day | Hour | Minute | Second | DateOnly), _ -> ValueNone
+        | (Ceiling | Floor | RoundTo _ | Truncate | Greatest | Least), _ -> ValueNone
+        | (CastText | CastInt | DateDiffDays | DateDiffSecs), _ -> ValueNone
 
     /// SQLite has no YEAR(); it has STRFTIME with a format string. PostgreSQL
     /// wants EXTRACT(field FROM x). MySQL has the plain function.
     let private datePartName (fn: SqlFn) =
         match fn with
-        | Year -> Some("YEAR", "%Y")
-        | Month -> Some("MONTH", "%m")
-        | Day -> Some("DAY", "%d")
-        | Hour -> Some("HOUR", "%H")
-        | Minute -> Some("MINUTE", "%M")
-        | Second -> Some("SECOND", "%S")
-        | _ -> None
+        | Year -> ValueSome("YEAR", "%Y")
+        | Month -> ValueSome("MONTH", "%m")
+        | Day -> ValueSome("DAY", "%d")
+        | Hour -> ValueSome("HOUR", "%H")
+        | Minute -> ValueSome("MINUTE", "%M")
+        | Second -> ValueSome("SECOND", "%S")
+        | _ -> ValueNone
 
     let rec private renderExpr (b: Builder) (e: SqlExpr) =
         let append (s: string) = write b s
@@ -123,7 +123,7 @@ module SqlGen =
         match e with
         | ColumnRef(table, column) ->
             if b.Qualify then
-                append (table + "." + column)
+                append ($"{table}.{column}")
             else
                 append column
 
@@ -385,7 +385,7 @@ module SqlGen =
         match b.Vendor with
         | Sqlite
         | Generic -> append (sqliteName + "(")
-        | _ -> append (name + "(")
+        | Postgres | MySql -> append (name + "(")
 
         renderExpr b first
         append ", "
@@ -491,18 +491,18 @@ module SqlGen =
         let append (s: string) = write b s
 
         match datePartName fn with
-        | Some(name, strftime) ->
+        | ValueSome(name, strftime) ->
             let arg = oneArg fn args
 
             (match b.Vendor with
              | Sqlite ->
                  // STRFTIME returns text, so cast back to a number to keep
                  // comparisons behaving like the other engines.
-                 append ("CAST(STRFTIME('" + strftime + "', ")
+                 append ($"CAST(STRFTIME('{strftime}', ")
                  renderExpr b arg
                  append ") AS INTEGER)"
              | Postgres ->
-                 append ("EXTRACT(" + name + " FROM ")
+                 append ($"EXTRACT({name} FROM ")
                  renderExpr b arg
                  append ")"
              | MySql
@@ -510,10 +510,10 @@ module SqlGen =
                  append (name + "(")
                  renderExpr b arg
                  append ")")
-        | None ->
+        | ValueNone ->
             match fnName b.Vendor fn with
-            | None -> failwith ("SqlGen: no SQL mapping for " + string fn)
-            | Some name ->
+            | ValueNone -> failwith ("SqlGen: no SQL mapping for " + string fn)
+            | ValueSome name ->
                 // PostgreSQL's STRPOS takes (haystack, needle) like .NET's
                 // IndexOf; MySQL's LOCATE takes (needle, haystack).
                 let args =
@@ -585,7 +585,7 @@ module SqlGen =
 
             append "DATETIME("
             renderExpr b inner
-            append (", '" + signed + " " + unitName + "s')")
+            append ($", '{signed} {unitName}s')")
 
     and private renderSource (b: Builder) (s: Source) =
         let append (t: string) = write b t
@@ -593,7 +593,7 @@ module SqlGen =
         if s.Alias = s.Table then
             append s.Table
         else
-            append (s.Table + " AS " + s.Alias)
+            append ($"{s.Table} AS {s.Alias}")
 
     /// Renders a query into an existing builder, so a subquery shares the outer
     /// statement's parameter list and stays numbered in the order the SQL
@@ -766,7 +766,7 @@ module SqlGen =
         // Columns are bare here, not qualified: an INSERT names exactly one
         // table and every engine rejects `INSERT INTO t (t.c) ..`.
         let b = newBuilder vendor false
-        write b ("INSERT INTO " + i.Table + " (")
+        write b ($"INSERT INTO {i.Table} (")
 
         i.Assignments
         |> Array.iteri (fun n a ->
@@ -802,7 +802,7 @@ module SqlGen =
             failwith "SqlGen: the insert has no rows"
 
         let b = newBuilder vendor false
-        write b ("INSERT INTO " + i.Table + " (")
+        write b ($"INSERT INTO {i.Table} (")
 
         i.Columns
         |> Array.iteri (fun n c ->
@@ -840,7 +840,7 @@ module SqlGen =
         match vendor with
         | Postgres ->
             let sql, ps = renderInsert vendor i
-            Some(sql + " RETURNING " + keyColumn, ps)
+            Some($"{sql} RETURNING {keyColumn}", ps)
         | _ -> None
 
     /// The query that reports the key the last insert on this connection
@@ -861,7 +861,7 @@ module SqlGen =
             failwith "SqlGen: the update has no WHERE and would rewrite every row -- say Update.all if that is meant"
 
         let b = newBuilder vendor false
-        write b ("UPDATE " + u.Table + " SET ")
+        write b ($"UPDATE {u.Table} SET ")
         renderAssignments b u.Assignments
 
         match u.Where with

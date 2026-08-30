@@ -121,11 +121,11 @@ module Convert =
                     // range instead of overflowing at 19.
                     let mutable mantissa = 0M
 
-                    for i in 0 .. intPart.Length - 1 do
-                        mantissa <- mantissa * 10M + decimal (int intPart.[i] - int '0')
+                    for x in intPart do
+                        mantissa <- mantissa * 10M + decimal (int x - int '0')
 
-                    for i in 0 .. fracPart.Length - 1 do
-                        mantissa <- mantissa * 10M + decimal (int fracPart.[i] - int '0')
+                    for x in fracPart do
+                        mantissa <- mantissa * 10M + decimal (int x - int '0')
 
                     let mutable scale = 1M
 

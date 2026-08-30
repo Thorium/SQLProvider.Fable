@@ -82,7 +82,7 @@ let private render (vendor: Vendor) (q: Query) =
             | other -> SqlValue.typeName other)
         |> String.concat ","
 
-    if values = "" then sql else sql + " | " + values
+    if values = "" then sql else $"{sql} | {values}"
 
 /// The two spellings, which build the same `Query`. The computation expression
 /// is the one to read first:
@@ -191,7 +191,7 @@ let run () : TestResult[] =
         check
             "computed columns get an alias"
             "SELECT UPPER(Customer.Name) AS expr0 FROM Customer"
-            (render Sqlite (Query.from Customer.table |> Query.select [| Expr.upper (Customer.Name.E) |]))
+            (render Sqlite (Query.from Customer.table |> Query.select [| Expr.upper Customer.Name.E |]))
     )
 
     results.Add(
@@ -201,7 +201,7 @@ let run () : TestResult[] =
             (render
                 Sqlite
                 (Query.from Customer.table
-                 |> Query.selectAs [| "shout", Expr.upper (Customer.Name.E) |]))
+                 |> Query.selectAs [| "shout", Expr.upper Customer.Name.E |]))
     )
 
     results.Add(
@@ -282,7 +282,7 @@ let run () : TestResult[] =
                  |> Query.leftJoinAs
                      Order.table
                      "o"
-                     (Expr.eq (Customer.CustomerId.E) ((Col.onAlias "o" Order.CustomerId)).E)))
+                     (Expr.eq Customer.CustomerId.E ((Col.onAlias "o" Order.CustomerId)).E)))
     )
 
     // A table joined to itself needs both sides aliased, which is the whole
@@ -332,7 +332,7 @@ let run () : TestResult[] =
         check
             "is null"
             "SELECT * FROM Customer WHERE (Customer.Country IS NULL)"
-            (render Sqlite (Query.from Customer.table |> Query.where (Expr.isNull (Customer.Country.E))))
+            (render Sqlite (Query.from Customer.table |> Query.where (Expr.isNull Customer.Country.E)))
     )
 
     results.Add(
@@ -415,7 +415,7 @@ let run () : TestResult[] =
 
     let upperQuery =
         Query.from Customer.table
-        |> Query.where (Expr.eq (Expr.upper (Customer.Name.E)) (Literal(SqlText "BOB")))
+        |> Query.where (Expr.eq (Expr.upper Customer.Name.E) (Literal(SqlText "BOB")))
 
     results.Add(
         check
@@ -426,7 +426,7 @@ let run () : TestResult[] =
 
     let lengthQuery =
         Query.from Customer.table
-        |> Query.where (Expr.gt (Expr.length (Customer.Name.E)) (Literal(SqlInt 3L)))
+        |> Query.where (Expr.gt (Expr.length Customer.Name.E) (Literal(SqlInt 3L)))
 
     results.Add(
         check
@@ -444,7 +444,7 @@ let run () : TestResult[] =
 
     let yearQuery =
         Query.from Customer.table
-        |> Query.where (Expr.eq (Expr.year (Customer.Joined.E)) (Literal(SqlInt 2026L)))
+        |> Query.where (Expr.eq (Expr.year Customer.Joined.E) (Literal(SqlInt 2026L)))
 
     results.Add(
         check
@@ -469,7 +469,7 @@ let run () : TestResult[] =
 
     let concatQuery =
         Query.from Customer.table
-        |> Query.selectAs [| "label", Expr.concat (Customer.Name.E) (Literal(SqlText "!")) |]
+        |> Query.selectAs [| "label", Expr.concat Customer.Name.E (Literal(SqlText "!")) |]
 
     results.Add(
         check
@@ -488,7 +488,7 @@ let run () : TestResult[] =
 
     let indexQuery =
         Query.from Customer.table
-        |> Query.selectAs [| "at", Expr.indexOf (Customer.Name.E) (Literal(SqlText "a")) |]
+        |> Query.selectAs [| "at", Expr.indexOf Customer.Name.E (Literal(SqlText "a")) |]
 
     results.Add(
         check
@@ -539,7 +539,7 @@ let run () : TestResult[] =
         check
             "contains wraps the value in wildcards"
             "SELECT * FROM Customer WHERE (Customer.Name LIKE @p0 ESCAPE '!') | %bob%"
-            (render Sqlite (Query.from Customer.table |> Query.where (Expr.contains (Customer.Name.E) "bob")))
+            (render Sqlite (Query.from Customer.table |> Query.where (Expr.contains Customer.Name.E "bob")))
     )
 
     results.Add(
@@ -549,14 +549,14 @@ let run () : TestResult[] =
             (render
                 Sqlite
                 (Query.from Customer.table
-                 |> Query.where (Expr.startsWith (Customer.Name.E) "bob")))
+                 |> Query.where (Expr.startsWith Customer.Name.E "bob")))
     )
 
     results.Add(
         check
             "endsWith anchors the back"
             "SELECT * FROM Customer WHERE (Customer.Name LIKE @p0 ESCAPE '!') | %bob"
-            (render Sqlite (Query.from Customer.table |> Query.where (Expr.endsWith (Customer.Name.E) "bob")))
+            (render Sqlite (Query.from Customer.table |> Query.where (Expr.endsWith Customer.Name.E "bob")))
     )
 
     // The point of the escaping: a search for a literal % finds one, instead of
@@ -566,7 +566,7 @@ let run () : TestResult[] =
         check
             "a wildcard in the value is escaped"
             "%50!% off%"
-            (match Expr.contains (Customer.Name.E) "50% off" with
+            (match Expr.contains Customer.Name.E "50% off" with
              | LikeEscaped(_, SqlText pattern) -> pattern
              | _ -> "not a pattern")
     )
@@ -575,7 +575,7 @@ let run () : TestResult[] =
         check
             "an underscore and the escape character are escaped too"
             "%a!_b!!c%"
-            (match Expr.contains (Customer.Name.E) "a_b!c" with
+            (match Expr.contains Customer.Name.E "a_b!c" with
              | LikeEscaped(_, SqlText pattern) -> pattern
              | _ -> "not a pattern")
     )
@@ -584,7 +584,7 @@ let run () : TestResult[] =
 
     let dateOnlyQuery =
         Query.from Customer.table
-        |> Query.selectAs [| "d", Expr.dateOnly (Customer.Joined.E) |]
+        |> Query.selectAs [| "d", Expr.dateOnly Customer.Joined.E |]
 
     results.Add(
         check "date truncation, SQLite" "SELECT DATE(Customer.Joined) AS d FROM Customer" (render Sqlite dateOnlyQuery)
@@ -599,7 +599,7 @@ let run () : TestResult[] =
 
     let addDaysQuery =
         Query.from Customer.table
-        |> Query.selectAs [| "d", Expr.addDays (Customer.Joined.E) 7 |]
+        |> Query.selectAs [| "d", Expr.addDays Customer.Joined.E 7 |]
 
     results.Add(
         check
@@ -631,7 +631,7 @@ let run () : TestResult[] =
             (render
                 Sqlite
                 (Query.from Customer.table
-                 |> Query.selectAs [| "d", Expr.addMonths (Customer.Joined.E) -3 |]))
+                 |> Query.selectAs [| "d", Expr.addMonths Customer.Joined.E -3 |]))
     )
 
     results.Add(
@@ -641,7 +641,7 @@ let run () : TestResult[] =
             (render
                 Postgres
                 (Query.from Customer.table
-                 |> Query.selectAs [| "d", Expr.addMonths (Customer.Joined.E) -3 |]))
+                 |> Query.selectAs [| "d", Expr.addMonths Customer.Joined.E -3 |]))
     )
 
     // --- CASE WHEN --------------------------------------------------------
@@ -746,7 +746,7 @@ let run () : TestResult[] =
                 (Query.from Customer.table
                  |> Query.where (
                      Expr.gt
-                         (Customer.Balance.E)
+                         Customer.Balance.E
                          (Expr.scalarQuery (Query.avgQuery Customer.Balance (Query.from Customer.table)))
                  )))
     )
@@ -761,7 +761,7 @@ let run () : TestResult[] =
                 render
                     Sqlite
                     (Query.from Order.table
-                     |> Query.where (Expr.inQuery (Order.CustomerId.E) (Query.from Customer.table)))
+                     |> Query.where (Expr.inQuery Order.CustomerId.E (Query.from Customer.table)))
                 |> ignore
 
                 "rendered anyway"
@@ -785,7 +785,7 @@ let run () : TestResult[] =
                 | other -> SqlValue.typeName other)
             |> String.concat ","
 
-        if values = "" then sql else sql + " | " + values
+        if values = "" then sql else $"{sql} | {values}"
 
     results.Add(
         check
@@ -830,7 +830,7 @@ let run () : TestResult[] =
                 Sqlite
                 (UpdateStmt(
                     Update.table Customer.table
-                    |> Update.setExpr Customer.Balance (Expr.add (Customer.Balance.E) (Literal(SqlFloat 10.0)))
+                    |> Update.setExpr Customer.Balance (Expr.add Customer.Balance.E (Literal(SqlFloat 10.0)))
                     |> Update.whereKey Customer.CustomerId 7
                 )))
     )
@@ -925,7 +925,7 @@ let run () : TestResult[] =
                      | other -> SqlValue.typeName other)
                  |> String.concat ","
 
-             sql + " | " + values)
+             $"{sql} | {values}")
     )
 
     // Rows that disagree would otherwise take the previous row's value for a
@@ -1096,11 +1096,11 @@ let run () : TestResult[] =
             "CE: join"
             (sqlQuery {
                 from Customer.table
-                join Order.table (Expr.eq (Customer.CustomerId.E) (Order.CustomerId.E))
+                join Order.table (Expr.eq Customer.CustomerId.E (Order.CustomerId.E))
                 where (Customer.Country == "UK")
             })
             (Query.from Customer.table
-             |> Query.join Order.table (Expr.eq (Customer.CustomerId.E) (Order.CustomerId.E))
+             |> Query.join Order.table (Expr.eq Customer.CustomerId.E (Order.CustomerId.E))
              |> Query.where (Customer.Country == "UK"))
     )
 
@@ -1150,10 +1150,10 @@ let run () : TestResult[] =
             "CE: a subquery in where"
             (sqlQuery {
                 from Order.table
-                where (Expr.inQuery (Order.CustomerId.E) ukCustomerIds)
+                where (Expr.inQuery Order.CustomerId.E ukCustomerIds)
             })
             (Query.from Order.table
-             |> Query.where (Expr.inQuery (Order.CustomerId.E) ukCustomerIds))
+             |> Query.where (Expr.inQuery Order.CustomerId.E ukCustomerIds))
     )
 
     results.Add(
@@ -1165,7 +1165,7 @@ let run () : TestResult[] =
                 where (
                     Expr.exists (
                         Query.from Order.table
-                        |> Query.where (Expr.eq (Order.CustomerId.E) (Customer.CustomerId.E))
+                        |> Query.where (Expr.eq Order.CustomerId.E (Customer.CustomerId.E))
                     )
                 )
             })
@@ -1173,7 +1173,7 @@ let run () : TestResult[] =
              |> Query.where (
                  Expr.exists (
                      Query.from Order.table
-                     |> Query.where (Expr.eq (Order.CustomerId.E) (Customer.CustomerId.E))
+                     |> Query.where (Expr.eq Order.CustomerId.E (Customer.CustomerId.E))
                  )
              ))
     )

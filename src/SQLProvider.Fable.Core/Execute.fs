@@ -37,9 +37,8 @@ module Db =
     /// `tryHead` when an empty result is an answer rather than a bug.
     let head (conn: ISqlConnector) (q: Query) : Async<SqlRow> =
         async {
-            let! row = tryHead conn q
 
-            match row with
+            match! tryHead conn q with
             | Some r -> return r
             | None -> return failwith "head: the query returned no rows"
         }
@@ -62,9 +61,8 @@ module Db =
     /// LINQ's `exactlyOne`.
     let exactlyOne (conn: ISqlConnector) (q: Query) : Async<SqlRow> =
         async {
-            let! row = tryExactlyOne conn q
 
-            match row with
+            match! tryExactlyOne conn q with
             | Some r -> return r
             | None -> return failwith "exactlyOne: the query returned no rows"
         }

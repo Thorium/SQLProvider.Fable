@@ -200,7 +200,7 @@ let ``an awkward column name is escaped rather than renamed`` () =
 let private repoRoot () =
     let mutable dir = System.IO.DirectoryInfo(System.AppContext.BaseDirectory)
 
-    while dir <> null
+    while (not (isNull dir))
           && not (System.IO.File.Exists(System.IO.Path.Combine(dir.FullName, "SQLProvider.Fable.slnx"))) do
         dir <- dir.Parent
 

@@ -88,7 +88,7 @@ module Insert =
     /// would otherwise take the previous row's value for it.
     let combine (inserts: Insert list) : InsertMany =
         match inserts with
-        | [] -> failwith "Insert.combine: no rows"
+        | [] -> failwith $"Insert.combine: no rows, calling combine with inserts: {inserts}"
         | first :: _ ->
             let columns = first.Assignments |> Array.map (fun a -> a.Column)
 
@@ -104,7 +104,7 @@ module Insert =
                 let theseColumns = i.Assignments |> Array.map (fun a -> a.Column)
 
                 if theseColumns.Length <> columns.Length then
-                    failwith "Insert.combine: rows set different numbers of columns"
+                    failwith $"Insert.combine: rows set different numbers of columns, calling combine with inserts: {inserts}"
 
                 Array.iteri
                     (fun n (c: string) ->

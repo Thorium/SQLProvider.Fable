@@ -10,7 +10,7 @@ let private assertAllPassed (results: Harness.TestResult[]) =
     let failures =
         results
         |> Array.filter (fun r -> not r.Passed)
-        |> Array.map (fun r -> r.Name + ": " + r.Detail)
+        |> Array.map (fun r -> $"{r.Name}: {r.Detail}")
 
     Assert.True(results.Length > 0, "the suite ran no tests")
     Assert.Empty(failures)

@@ -234,7 +234,7 @@ module Col =
     let int64 table name : Column<int64> = make table name SqlInt
 
     let int table name : Column<int> =
-        make table name (fun v -> SqlInt(widen v))
+        make table name (widen >> SqlInt)
 
     let text table name : Column<string> = make table name SqlText
     let float table name : Column<float> = make table name SqlFloat
@@ -355,8 +355,7 @@ module Expr =
         // Indexed rather than `for ch in value`: a string has no enumerator on
         // Fable's Rust target (G27), and indexing is what the rest of this
         // library already uses to walk one.
-        for i in 0 .. value.Length - 1 do
-            let ch = value.[i]
+        for ch in value do
 
             if ch = '%' || ch = '_' || ch = likeEscapeChar then
                 parts.Add(string likeEscapeChar)

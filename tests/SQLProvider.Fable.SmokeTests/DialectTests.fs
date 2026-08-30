@@ -20,7 +20,7 @@ let private render (sql: string, values: SqlValue[]) =
             | other -> SqlValue.typeName other)
         |> String.concat ","
 
-    sql + " | " + vs
+    $"{sql} | {vs}"
 
 let run () : TestResult[] =
     let results = ResizeArray<TestResult>()

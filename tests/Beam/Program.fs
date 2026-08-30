@@ -30,8 +30,8 @@ let private convertChecks () =
         Harness.isTrue "guid round-trips" (Convert.tryParseGuid "0f8fad5b-d9cb-469f-a165-70867728950e" = Some theId)
     )
 
-    results.Add(Harness.isTrue "junk decimal is rejected" (Convert.tryParseDecimal "1,5" = None))
-    results.Add(Harness.isTrue "junk date is rejected" (Convert.tryParseDate "not a date" = None))
+    results.Add(Harness.isTrue "junk decimal is rejected" ((Convert.tryParseDecimal "1,5") |> Option.isNone))
+    results.Add(Harness.isTrue "junk date is rejected" ((Convert.tryParseDate "not a date") |> Option.isNone))
 
     results.ToArray()
 
@@ -51,7 +51,7 @@ let private rowChecks () =
     results.Add(Harness.check "text column" "Alfreds" (Row.text rows.[0] "Name"))
     results.Add(Harness.check "int column" "2" (string (Row.int rows.[1] "Id")))
     results.Add(Harness.check "case-insensitive lookup" "Alfreds" (Row.text rows.[0] "nAmE"))
-    results.Add(Harness.isTrue "null maps to None" (Row.textOpt rows.[0] "Country" = None))
+    results.Add(Harness.isTrue "null maps to None" ((Row.textOpt rows.[0] "Country") |> Option.isNone))
     results.Add(Harness.isTrue "non-null maps to Some" (Row.textOpt rows.[1] "Country" = Some "Sweden"))
     // An integer storage class in a float column has to widen, not fail.
     results.Add(Harness.isTrue "int widens to float" (Row.float rows.[1] "Balance" = 250.0))

@@ -353,7 +353,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
             Db.query
                 c
                 (Query.from Cols.table
-                 |> Query.where (Expr.isNull (Cols.Country.E))
+                 |> Query.where (Expr.isNull Cols.Country.E)
                  |> Query.orderBy Cols.CustomerId
                  |> Query.select [| Cols.Name.E |])
 
@@ -453,7 +453,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
             Db.update
                 c
                 (Update.table Cols.table
-                 |> Update.setExpr Cols.Balance (Expr.add (Cols.Balance.E) (Literal(SqlFloat 2.5)))
+                 |> Update.setExpr Cols.Balance (Expr.add Cols.Balance.E (Literal(SqlFloat 2.5)))
                  |> Update.whereKey Cols.CustomerId 200)
 
         results.Add(check "update reports one row" "1" (string bumped))
@@ -578,7 +578,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
             Db.query
                 c
                 (Query.from Cols.table
-                 |> Query.where (Expr.inQuery (Cols.CustomerId.E) germanIds)
+                 |> Query.where (Expr.inQuery Cols.CustomerId.E germanIds)
                  |> Query.select [| Cols.Name.E |])
 
         results.Add(
@@ -594,7 +594,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
                  |> Query.where (
                      Expr.exists (
                          Query.from Cols.table
-                         |> Query.where (Expr.eq (Cols.CustomerId.E) ((Col.onAlias "outer_c" Cols.CustomerId)).E)
+                         |> Query.where (Expr.eq Cols.CustomerId.E ((Col.onAlias "outer_c" Cols.CustomerId)).E)
                          |> Query.where (Cols.Country == "Sweden")
                      )
                  )
@@ -613,7 +613,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
                 c
                 (Query.from Cols.table
                  |> Query.where (
-                     Expr.gt (Cols.Balance.E) (Expr.scalarQuery (Query.avgQuery Cols.Balance (Query.from Cols.table)))
+                     Expr.gt Cols.Balance.E (Expr.scalarQuery (Query.avgQuery Cols.Balance (Query.from Cols.table)))
                  ))
 
         results.Add(check "subquery: scalar comparison" "2" (string aboveAverage))
@@ -696,7 +696,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
                                  |> Insert.set Cols.Name "Rolled back"
                                  |> Insert.set Cols.Balance 0.0)
 
-                        return failwith "deliberate"
+                        return failwith $"deliberate, calling run with c: {c}, fixture: {fixture}"
                     })
         with _ ->
             txFailed <- true
@@ -722,7 +722,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
             Db.query
                 c
                 (Query.from Cols.table
-                 |> Query.where (Expr.contains (Cols.Name.E) "50% off")
+                 |> Query.where (Expr.contains Cols.Name.E "50% off")
                  |> Query.select [| Cols.Name.E |])
 
         results.Add(
@@ -753,7 +753,7 @@ let run (c: ISqlConnector) (fixture: Fixture) : Async<TestResult[]> =
             Db.query
                 c
                 (Query.from Cols.table
-                 |> Query.where (Expr.startsWith (Cols.Name.E) "Alf")
+                 |> Query.where (Expr.startsWith Cols.Name.E "Alf")
                  |> Query.select [| Cols.Name.E |])
 
         results.Add(

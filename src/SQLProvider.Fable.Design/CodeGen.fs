@@ -67,7 +67,7 @@ module CodeGen =
     /// The identifier a name becomes in the generated source.
     let identifier (name: string) =
         if keywords.Contains name then
-            "``" + name + "``"
+            $"``{name}``"
         else
             // Anything that is not a plain identifier gets backticks too, which
             // covers spaces and punctuation without renaming the column.
@@ -76,7 +76,7 @@ module CodeGen =
                 && (System.Char.IsLetter name.[0] || name.[0] = '_')
                 && name |> Seq.forall (fun c -> System.Char.IsLetterOrDigit c || c = '_')
 
-            if isPlain then name else "``" + name + "``"
+            if isPlain then name else $"``{name}``"
 
     let private colFactory (kind: ColumnKind) =
         match kind with
@@ -131,7 +131,7 @@ module CodeGen =
         line ("/// " + t.Name + (if t.IsView then " (view -- readable, not writable)" else ""))
         line ("module " + identifier t.Name + " =")
         line ""
-        line ("    let table = \"" + t.Name + "\"")
+        line ($"    let table = \"{t.Name}\"")
         line ""
 
         for c in t.Columns do
@@ -265,7 +265,7 @@ module CodeGen =
                 let condition =
                     fk.Columns
                     |> Array.map pairExpr
-                    |> Array.reduce (fun acc part -> "Expr.andAlso (" + acc + ") (" + part + ")")
+                    |> Array.reduce (fun acc part -> $"Expr.andAlso ({acc}) ({part})")
 
                 line ("        /// " + (fk.Columns |> Array.map pairDoc |> String.concat ", "))
                 line ("        let " + identifier name + " = " + condition)
