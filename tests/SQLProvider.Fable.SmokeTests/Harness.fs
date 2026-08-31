@@ -20,7 +20,11 @@ let fail name detail =
       Passed = false
       Detail = detail }
 
-let check name expected actual =
+// The parameters are annotated on purpose: everything is compared as text by
+// design, and without the annotation the interpolation below leaves this
+// generic -- which .NET accepts and the Rust target cannot format (no Display
+// on a bare type parameter).
+let check name (expected: string) (actual: string) =
     if expected = actual then
         pass name
     else

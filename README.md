@@ -3,7 +3,7 @@
 Typed SQL for F#, from one source, on .NET **and** through Fable to **Rust**,
 **JavaScript NodeJs** and **Erlang/BEAM**.
 
-NOTE: Rust is "coming soon" as it needs some Fable side PRs merged first.
+NOTE: Rust needs a Fable newer than 5.15 — the fixes are merged on Fable's main branch, awaiting release.
 
 Point the generator at your database, get a module per table with typed columns
 and row mappers, and write queries against them:
@@ -57,26 +57,20 @@ value you supply is a bound parameter, never concatenated into the statement.
 | .NET | ADO.NET (any `DbConnection`) | nothing | full suite, over `Microsoft.Data.Sqlite` |
 | JavaScript | `node:sqlite` (Node 22.5+) | Fable 5.15 | full suite |
 | Erlang / BEAM | *none yet* | Fable 5.15 | everything except the driver |
-| Rust | sqlx + SQLite (bundled) | **unreleased Fable**, see below | full suite |
-| Rust | sqlx + **PostgreSQL** | **unreleased Fable**, see below | full suite, against PostgreSQL 18 |
-| Rust | sqlx + MySQL / MariaDB | **unreleased Fable**, see below | compiles and connects; **not run against a server** |
+| Rust | sqlx + SQLite (bundled) | Fable built from `main` (see below) | full suite |
+| Rust | sqlx + **PostgreSQL** | Fable built from `main` (see below) | full suite, against PostgreSQL 18 |
+| Rust | sqlx + MySQL / MariaDB | Fable built from `main` (see below) | compiles and connects; **not run against a server** |
 
 **.NET, JavaScript and BEAM work on released Fable today** — all three were run
 against Fable 5.15.0 from NuGet, not a local build.
 
-**Rust needs a Fable fix that has not shipped yet.** Two independent reasons,
-both in the Rust async runtime:
-
-- The async computation builder has no `Combine`, so `Db.submit` and
-  `Db.inTransaction` -- which use a `for` loop and a `try/with` inside an
-  `async` block -- fail to compile with *no `singleton` in `AsyncBuilder_`*.
-- Awaiting a task sleeps 100 ms per poll, which measured 2718 ms for 65 ms of
-  real work. Every query would pay it.
-
-Both are fixed by the `fix/rust-async` branch in
-[fable-compiler/Fable](https://github.com/fable-compiler/Fable). Until it is
-merged and released, build Fable from that branch and point `FABLE_LOCAL_DLL`
-at it; see [GAPS.md](GAPS.md).
+**Rust works on Fable's `main` branch; the release carrying it is pending.**
+The fixes it needed — the async builder's `Combine`, the async runtime's
+polling overhead, exception and type-test codegen, string enumeration — are
+all merged into [fable-compiler/Fable](https://github.com/fable-compiler/Fable)
+(PRs #4916–#4918, #4920, #4921), and the full suite passes against a compiler
+built from unmodified `main`. Until the next Fable release ships, build Fable
+from `main` and point `FABLE_LOCAL_DLL` at it; see [GAPS.md](GAPS.md).
 
 The three Rust backends are one code path — sqlx's `Any` driver picks the engine
 from the URL — so they differ only in connection string, placeholder syntax and
@@ -110,9 +104,9 @@ The packages carry their F# sources under `fable/`, the way Fable libraries do,
 so a Fable project compiles the library to its own target while .NET uses the
 compiled assembly from the same package.
 
-JavaScript and BEAM need nothing beyond released Fable. Rust additionally needs
-the unmerged fix described under [Status](#status), and the consuming crate's
-`Cargo.toml` needs the driver stack the connector calls into:
+JavaScript and BEAM need nothing beyond released Fable. Rust needs a Fable
+built from `main` until the next release ships (see [Status](#status)), and the
+consuming crate's `Cargo.toml` needs the driver stack the connector calls into:
 
 ```toml
 [dependencies]

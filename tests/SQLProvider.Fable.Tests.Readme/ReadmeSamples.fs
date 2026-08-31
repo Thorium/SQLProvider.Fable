@@ -46,7 +46,6 @@ module Order =
     let OrderId = Col.int64 table "OrderId"
     let CustomerId = Col.int64 table "CustomerId"
 
-    [<Struct>]
     type Row = { OrderId: int64 }
 
     let qualified = [| "Orders_OrderId", OrderId.E |]
@@ -69,7 +68,9 @@ let ukCustomers (conn: ISqlConnector) =
                 where (Customer.Country == "UK")
                 where (Customer.Balance >. 100.0)
                 sortByDescending Customer.Balance
-                select (Customer.Name, Customer.Country)
+                // No `select`: ofRow reads every column, so the projection has
+                // to keep them all -- a narrowed select pairs with Row readers
+                // or a narrower mapper, not with ofRow.
                 take 10
             }
             |> Db.query conn
