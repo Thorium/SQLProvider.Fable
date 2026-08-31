@@ -1,0 +1,13 @@
+<Project>
+
+  <!-- Lives in .targets, not .props: the SDK adds the implicit FSharp.Core
+       reference after Directory.Build.props is imported, so an Update there
+       runs before the item exists and silently does nothing. Without this the
+       packages inherit the compiling SDK's FSharp.Core as their dependency
+       floor, forcing every consumer to its very newest; 8.0 is comfortably
+       old enough for everything this code uses. -->
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="8.0.301" />
+  </ItemGroup>
+
+</Project>

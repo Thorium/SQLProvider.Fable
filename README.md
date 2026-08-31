@@ -92,8 +92,8 @@ Reference `SQLProvider.Fable.Core` plus the connector for your target — only
 one connector ends up in a given build:
 
 ```xml
-<PackageReference Include="SQLProvider.Fable.Core" Version="0.1.0" />
-<PackageReference Include="SQLProvider.Fable.Ado" Version="0.1.0" />   <!-- .NET -->
+<PackageReference Include="SQLProvider.Fable.Core" Version="0.1.1" />
+<PackageReference Include="SQLProvider.Fable.Ado" Version="0.1.1" />   <!-- .NET -->
 <!-- or SQLProvider.Fable.Rust / SQLProvider.Fable.Js for a Fable target -->
 ```
 
