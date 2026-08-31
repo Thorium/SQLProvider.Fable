@@ -25,7 +25,7 @@ let ukCustomers conn =
             }
             |> Db.query conn
 
-        return rows |> ResultSet.map Customer.ofRow
+        return rows |> ResultSet.map (fun r -> Row.text r "Name", Row.textOpt r "Country")
     }
 ```
 

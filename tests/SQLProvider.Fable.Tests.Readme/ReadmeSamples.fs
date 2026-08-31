@@ -68,14 +68,14 @@ let ukCustomers (conn: ISqlConnector) =
                 where (Customer.Country == "UK")
                 where (Customer.Balance >. 100.0)
                 sortByDescending Customer.Balance
-                // No `select`: ofRow reads every column, so the projection has
-                // to keep them all -- a narrowed select pairs with Row readers
-                // or a narrower mapper, not with ofRow.
+                select (Customer.Name, Customer.Country)
                 take 10
             }
             |> Db.query conn
 
-        return rows |> ResultSet.map Customer.ofRow
+        // Read what was selected: `ofRow` is for the unprojected row -- it
+        // reads every column, and this select kept only two.
+        return rows |> ResultSet.map (fun r -> Row.text r "Name", Row.textOpt r "Country")
     }
 
 let connecting () =
