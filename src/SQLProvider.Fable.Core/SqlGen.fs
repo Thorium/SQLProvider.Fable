@@ -83,7 +83,7 @@ module SqlGen =
         | Abs, _ -> ValueSome "ABS"
 
         | Length, Sqlite -> ValueSome "LENGTH"
-        | Length, Postgres -> ValueSome "CHAR_LENGTH"
+        | Length, Postgres
         | Length, MySql -> ValueSome "CHAR_LENGTH"
         | Length, Generic -> ValueSome "LENGTH"
 
@@ -93,7 +93,7 @@ module SqlGen =
 
         | IndexOf, Postgres -> ValueSome "STRPOS"
         | IndexOf, MySql -> ValueSome "LOCATE"
-        | IndexOf, Sqlite -> ValueSome "INSTR"
+        | IndexOf, Sqlite
         | IndexOf, Generic -> ValueSome "INSTR"
 
         // Every engine's plain-rounding function has the same name.
@@ -116,6 +116,22 @@ module SqlGen =
         | Minute -> ValueSome("MINUTE", "%M")
         | Second -> ValueSome("SECOND", "%S")
         | _ -> ValueNone
+
+    /// The one argument of a single-argument function.
+    let private oneArg (fn: SqlFn) (args: SqlExpr list) : SqlExpr =
+        match args with
+        | [ single ] -> single
+        | _ -> failwith ("SqlGen: " + string fn + " takes exactly one argument")
+
+    let private twoArgs (fn: SqlFn) (args: SqlExpr list) : SqlExpr * SqlExpr =
+        match args with
+        | [ first; second ] -> first, second
+        | _ -> failwith ("SqlGen: " + string fn + " takes exactly two arguments")
+
+    /// `.Date`. SQLite and MySQL have DATE(); PostgreSQL's DATE() is not the
+    /// same thing, so it uses the truncation SQLProvider uses too.
+
+    /// The two arguments of a two-argument function.
 
     let rec private renderExpr (b: Builder) (e: SqlExpr) =
         let append (s: string) = write b s
@@ -269,20 +285,6 @@ module SqlGen =
     // tree loses its bindings (the G25 family) -- and small single-scrutinee
     // matches are what it compiles correctly.
 
-    /// The one argument of a single-argument function.
-    and private oneArg (fn: SqlFn) (args: SqlExpr list) : SqlExpr =
-        match args with
-        | [ single ] -> single
-        | _ -> failwith ("SqlGen: " + string fn + " takes exactly one argument")
-
-    /// The two arguments of a two-argument function.
-    and private twoArgs (fn: SqlFn) (args: SqlExpr list) : SqlExpr * SqlExpr =
-        match args with
-        | [ first; second ] -> first, second
-        | _ -> failwith ("SqlGen: " + string fn + " takes exactly two arguments")
-
-    /// `.Date`. SQLite and MySQL have DATE(); PostgreSQL's DATE() is not the
-    /// same thing, so it uses the truncation SQLProvider uses too.
     and private renderDateOnly (b: Builder) (arg: SqlExpr) =
         let append (s: string) = write b s
 

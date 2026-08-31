@@ -44,6 +44,7 @@ type Fixture =
 
 module Fixture =
 
+    [<Literal>]
     let private invoiceAsText =
         "CREATE TABLE Invoice (Id TEXT NOT NULL, Total TEXT NOT NULL, Issued TEXT NOT NULL, Rebate TEXT NULL)"
 

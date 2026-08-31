@@ -76,6 +76,7 @@ module Orders =
     let Freight = Col.decimal table "Freight"
 
     /// One row, as a record.
+    [<Struct>]
     type Row =
         { OrderId: int64
           CustomerId: int64

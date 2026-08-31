@@ -46,6 +46,7 @@ module Order =
     let OrderId = Col.int64 table "OrderId"
     let CustomerId = Col.int64 table "CustomerId"
 
+    [<Struct>]
     type Row = { OrderId: int64 }
 
     let qualified = [| "Orders_OrderId", OrderId.E |]

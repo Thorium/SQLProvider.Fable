@@ -347,6 +347,7 @@ module Expr =
     /// backslash as an escape *inside string literals* too, so `ESCAPE '\'`
     /// would escape its own closing quote there. `!` is ordinary in all three
     /// engines' string literals.
+    [<Literal>]
     let likeEscapeChar = '!'
 
     let escapeLikeValue (value: string) =

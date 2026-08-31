@@ -16,6 +16,7 @@ module SchemaReader =
 
     // --- SQLite ------------------------------------------------------------
 
+    [<Literal>]
     let private sqliteTables =
         "SELECT name, type FROM sqlite_master
          WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'
@@ -119,6 +120,7 @@ module SchemaReader =
 
     /// One row per column, ordered within its constraint, so a composite key
     /// reassembles by grouping on constraint_name.
+    [<Literal>]
     let private infoSchemaForeignKeys =
         "SELECT k.constraint_name, k.column_name, k.referenced_table_name, k.referenced_column_name
          FROM information_schema.key_column_usage k
@@ -133,6 +135,7 @@ module SchemaReader =
     /// joining it against a composite key cross-multiplies the pairs.
     /// `position_in_unique_constraint` is what lines each column up with the
     /// one it references.
+    [<Literal>]
     let private postgresForeignKeys =
         "SELECT kcu.constraint_name,
                 kcu.column_name,
@@ -168,7 +171,7 @@ module SchemaReader =
                     |> ResultSet.map (fun r ->
                         { Name = text r "column_name"
                           Kind = kindOfDbType (text r "data_type")
-                          IsNullable = (text r "is_nullable").ToUpperInvariant() = "YES"
+                          IsNullable = System.String.Equals((text r "is_nullable"), "YES", System.StringComparison.OrdinalIgnoreCase)
                           // COUNT-style flags come back as an integer on
                           // PostgreSQL and can arrive as a decimal on MySQL.
                           IsPrimaryKey =
